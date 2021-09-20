@@ -7,91 +7,67 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
-/**
- * App\Models\Post
- *
- * @property int $id
- * @property string $title
- * @property string|null $body
- * @property bool $is_public 公開・非公開
- * @property \Illuminate\Support\Carbon $published_at 公開日
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @method static \Database\Factories\PostFactory factory(...$parameters)
- * @method static \Illuminate\Database\Eloquent\Builder|Post newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Post newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Post query()
- * @method static \Illuminate\Database\Eloquent\Builder|Post whereBody($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Post whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Post whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Post whereIsPublic($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Post wherePublishedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Post whereTitle($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Post whereUpdatedAt($value)
- * @mixin \Eloquent
- */
 class Post extends Model
 {
     use HasFactory;
 
-    //更新できるプロパティを設定
     protected $fillable = [
         'title', 'body', 'is_public', 'published_at'
     ];
- 
-    //どのような型を扱うかを設定
+
     protected $casts = [
         'is_public' => 'bool',
         'published_at' => 'datetime'
     ];
 
-
-    // 公開のみ表示
-    public function scopePublic(Builder $query){
-        return $query->where('is_public', true);
-    }
- 
-
- 
-    // 公開記事をIDで取得
-    public function scopePublicFindById(Builder $query, int $id){
-        return $query->public()->findOrFail($id);
-    }
-
-
-    /*ゲッターを使用してフォーマットを共通で使う
-    日付フォーマットは同じものを使うことが多いので、この部分の処理をまとめましょう。
-    この場合はモデルのゲッターという機能を使用します。
-    ゲッターはモデルにget●●●Attributeという名前でメソッドを作ります。
-        公開日を年月日で表示 {{ $post->published_format }}
-    */ 
-    public function getPublishedFormatAttribute() {
-        return $this->published_at->format('Y年m月d日');
-    }
-
-    /*もし id 以外のカラム名を関連付ける場合はbelongsToの第二引数に指定します。*/
-    public function user(){
-        return $this->belongsTo(User::class);
-    }
-
-    protected static function boot(){ // update で勝手に呼び出されるらしい
+    protected static function boot()
+    {
         parent::boot();
-    
+
         // 保存時user_idをログインユーザーに設定
         self::saving(function($post) {
             $post->user_id = \Auth::id();
         });
     }
 
+    /**
+     * Userのリレーション
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function tags()
     {
         return $this->belongsToMany(Tag::class);
     }
 
-    // 公開記事一覧取得
-    public function scopePublicList(Builder $query, string $tagSlug = null){
+    /**
+     * 公開のみ表示
+     *
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopePublic(Builder $query)
+    {
+        return $query->where('is_public', true);
+    }
 
+    /**
+     * 公開記事一覧取得
+     *
+     * @param Builder $query
+     * @param string|null $tagSlug
+     * @return Builder
+     */
+    public function scopePublicList(Builder $query, ?string $tagSlug)
+    {
         if ($tagSlug) {
             $query->whereHas('tags', function($query) use ($tagSlug) {
                 $query->where('slug', $tagSlug);
@@ -104,6 +80,65 @@ class Post extends Model
             ->paginate(10);
     }
 
+    /**
+     * 公開記事をIDで取得
+     *
+     * @param Builder $query
+     * @param int $id
+     * @return Builder
+     */
+    public function scopePublicFindById(Builder $query, int $id)
+    {
+        return $query->public()->findOrFail($id);
+    }
 
+    /**
+     * 絞り込み検索
+     *
+     * @param Builder $query
+     * @param Request $request
+     * @return Builder
+     */
+    public function scopeSearch(Builder $query, Request $request)
+    {
+        // タイトル
+        if ($request->anyFilled('title')) {
+            $query->where('title', 'like', "%$request->title%");
+        }
+        // ユーザー
+        if ($request->anyFilled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+        // 公開・非公開
+        if ($request->anyFilled('is_public')) {
+            $query->where('is_public', $request->is_public);
+        }
+        // タグ
+        if ($request->anyFilled('tag_id')) {
+            $query->whereHas('tags', function($query) use ($request) {
+                $query->where('tag_id', $request->tag_id);
+            });
+        }
+        return $query;
+    }
 
+    /**
+     * 公開日を年月日で表示
+     *
+     * @return string
+     */
+    public function getPublishedFormatAttribute()
+    {
+        return $this->published_at->format('Y年m月d日');
+    }
+
+    /**
+     * 公開ステータスをラベル表示
+     *
+     * @return string
+     */
+    public function getIsPublicLabelAttribute()
+    {
+        return config('common.public_status')[$this->is_public];
+    }
 }

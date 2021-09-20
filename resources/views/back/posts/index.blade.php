@@ -1,11 +1,50 @@
 <?php
+/**
+ * @var Illuminate\Pagination\LengthAwarePaginator|\App\Models\Post[] $posts
+ */
 $title = '投稿一覧';
 ?>
 @extends('back.layouts.base')
- 
+
 @section('content')
-<div class="card-header">投稿一覧</div>
+<div class="card-header">{{ $title }}</div>
 <div class="card-body">
+    {!! Form::model($search, [
+        'route' => 'back.posts.index',
+        'method' => 'get',
+        'class' => 'mb-2'
+    ]) !!}
+        <div class="form-row align-items-center">
+            <div class="col-auto">
+                {{ Form::text('title', null, [
+                    'class' => 'form-control',
+                    'placeholder' => 'タイトル'
+                ]) }}
+            </div>
+            <div class="col-auto">
+                {{-- Form::select('user_id', $users, null, [
+                    'class' => 'custom-select',
+                    'placeholder' => '選択してください。'
+                ]) --}}
+            </div>
+            <div class="col-auto">
+                {{-- Form::select('is_public', config('common.public_status'), null, [
+                    'class' => 'custom-select',
+                    'placeholder' => '選択してください。'
+                ]) --}}
+            </div>
+            <div class="col-auto">
+                {{ Form::select('tag_id', $tags, null, [
+                    'class' => 'custom-select',
+                    'placeholder' => '選択してください。'
+                ]) }}
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">検索</button>
+            </div>
+        </div>
+    {{ Form::close() }}
+
     {{ link_to_route('back.posts.create', '新規登録', null, ['class' => 'btn btn-primary mb-3']) }}
     @if(0 < $posts->count())
         <table class="table table-striped table-bordered table-hover table-sm">
@@ -14,8 +53,9 @@ $title = '投稿一覧';
                     <th scope="col">ID</th>
                     <th scope="col">タイトル</th>
                     <th scope="col" style="width: 4.3em">状態</th>
+                    <th scope="col" style="width: 7em">タグ</th>
                     <th scope="col" style="width: 9em">公開日</th>
-                    <th scope="col" style="width: 6em">編集者</th></th>
+                    <th scope="col">編集者</th>
                     <th scope="col" style="width: 12em">編集</th>
                 </tr>
             </thead>
@@ -24,7 +64,13 @@ $title = '投稿一覧';
                 <tr>
                     <td>{{ $post->id }}</td>
                     <td>{{ $post->title }}</td>
-                    <td>{{ $post->is_public_label }}</td>
+                    <td>{{-- $post->is_public_label --}}</td>
+                    <td>
+                        @foreach($post->tags as $tag)
+                            @if (!$loop->first)、@endif
+                            {{ $tag->name }}
+                        @endforeach
+                    </td>
                     <td>{{ $post->published_format }}</td>
                     <td>{{ $post->user->name }}</td>
                     <td class="d-flex justify-content-center">
@@ -50,28 +96,8 @@ $title = '投稿一覧';
             </tbody>
         </table>
         <div class="d-flex justify-content-center">
-            {{ $posts->links() }}
+            {{ $posts->appends($search)->links() }}
         </div>
     @endif
 </div>
-
-
-<ul class="nav nav-pills mb-2">
-    <li class="nav-item">
-        {{ link_to_route('front.posts.index', 'すべて', null, [
-            'class' => 'nav-link'.
-            (request()->segment(3) === null ? ' active' : '')
-        ]) }}
-    </li>
-    @foreach($tags as $tag)
-        <li class="nav-item">
-            {{ link_to_route('front.posts.index.tag', $tag->name, $tag->slug, [
-                'class' => 'nav-link'.
-                (request()->segment(3) === $tag->slug ? ' active' : '')
-            ]) }}
-        </li>
-    @endforeach
-</ul>
-
-
 @endsection

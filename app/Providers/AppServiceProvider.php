@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Pagination\Paginator; //← 追加
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,10 +24,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        /*
-        ページャーナビゲーションの部分なのですが、このままだと崩れていると思います。
-        Laravel8ではTailwindcssというCSSのフレームワークがベースになっている為です。
-        今回はBootstrapを読み込んでいるので変更しましょう。*/
         Paginator::useBootstrap();
     }
 }

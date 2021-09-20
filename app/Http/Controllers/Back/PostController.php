@@ -3,32 +3,57 @@
 namespace App\Http\Controllers\Back;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Post;
-use App\Http\Requests\PostRequest;
 use App\Models\Tag;
+use App\Models\User;
+use App\Http\Requests\PostRequest;
+use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-    
-    public function index($tagSlug = null){
-        // 一覧画面
-        /*
-            $posts = Post::latest('id')->paginate(20);
-            一覧ページのクエリを確認するとレコードの数だけクエリが発行されているのでEager Loadingを使う
-        */
-        // 公開・新しい順に表示
-        $posts = Post::publicList($tagSlug);
-        $tags = Tag::all();
-    
-        return view('front.posts.index', compact('posts', 'tags'));
-
+    // タグの読み込み処理を共通にする
+    public function __construct()
+    {
+        $this->middleware(function ($request, \Closure $next) {
+            \View::share('tags', Tag::pluck('name', 'id')->toArray());
+            
+            return $next($request);
+        })->only('index', 'create', 'edit');
     }
 
- 
+    /**
+     * 一覧画面
+     *
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function index(Request $request)
+    {
+        $posts = Post::with('user', 'tags')->search($request)->latest('id')->paginate(20);
 
+        $search = $request->all();
+        $users = User::pluck('name', 'id')->toArray();
 
-    public function store(PostRequest $request){
+        return view('back.posts.index', compact('posts', 'search', 'users'));
+    }
+
+    /**
+     * 登録画面
+     *
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function create()
+    {
+        return view('back.posts.create');
+    }
+
+    /**
+     * 登録処理
+     *
+     * @param PostRequest $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function store(PostRequest $request)
+    {
         $post = Post::create($request->all());
         // タグを追加
         $post->tags()->attach($request->tags);
@@ -44,26 +69,26 @@ class PostController extends Controller
         }
     }
 
-
-
-    public function create(){
-     
-        $tags = Tag::pluck('name', 'id')->toArray();
-        return view('back.posts.create', compact('tags'));
-    }
-
-
-
-
-    public function edit( Post $post ) {
-        
+    /**
+     * 編集画面
+     *
+     * @param Post $post
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function edit(Post $post)
+    {
         return view('back.posts.edit', compact('post'));
     }
 
-
-
-
-    public function update(PostRequest $request, Post $post) {
+    /**
+     * 更新処理
+     *
+     * @param PostRequest $request
+     * @param Post $post
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update(PostRequest $request, Post $post)
+    {
         // タグを更新
         $post->tags()->sync($request->tags);
 
@@ -72,15 +97,19 @@ class PostController extends Controller
         } else {
             $flash = ['error' => 'データの更新に失敗しました'];
         }
-     
+
         return redirect()
             ->route('back.posts.edit', $post)
             ->with($flash);
     }
 
-
-
-
+    /**
+     * 削除処理
+     *
+     * @param Post $post
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
+     */
     public function destroy(Post $post)
     {
         // タグを削除
@@ -91,7 +120,7 @@ class PostController extends Controller
         } else {
             $flash = ['error' => 'データの削除に失敗しました'];
         }
-     
+
         return redirect()
             ->route('back.posts.index')
             ->with($flash);

@@ -16,7 +16,7 @@
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false">
                 <span class="navbar-toggler-icon"></span>
             </button>
- 
+
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item{{ Request::is('/') ? ' active' : '' }}">
@@ -33,11 +33,9 @@
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-md-12">
+                    <x-back.alert />
                     <div class="card">
-                      
-                      {{--この部分にこれから作る各ビューファイルの内容が入ります。--}}
                         @yield('content')
-
                     </div>
                 </div>
             </div>
