@@ -27,9 +27,9 @@ class PostRequest extends FormRequest
             'body' => 'max:1000',
             'is_public' => 'required|numeric',
             'published_at' => 'required|date_format:Y-m-d H:i',
+            'tags.*' => 'numeric|exists:tags,id'
         ];
     }
-
 
     public function attributes(){
         return [
@@ -37,6 +37,7 @@ class PostRequest extends FormRequest
             'body' => '内容',
             'is_public' => 'ステータス',
             'published_at' => '公開日',
+            'tags.*' => 'タグ'
         ];
     }
 

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 
 /**
  * App\Models\Post
@@ -50,13 +51,7 @@ class Post extends Model
         return $query->where('is_public', true);
     }
  
-    // 公開記事一覧取得
-    public function scopePublicList(Builder $query){
-        return $query
-            ->public()
-            ->latest('published_at')
-            ->paginate(10);
-    }
+
  
     // 公開記事をIDで取得
     public function scopePublicFindById(Builder $query, int $id){
@@ -87,4 +82,28 @@ class Post extends Model
             $post->user_id = \Auth::id();
         });
     }
+
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class);
+    }
+
+    // 公開記事一覧取得
+    public function scopePublicList(Builder $query, string $tagSlug = null){
+
+        if ($tagSlug) {
+            $query->whereHas('tags', function($query) use ($tagSlug) {
+                $query->where('slug', $tagSlug);
+            });
+        }
+        return $query
+            ->with('tags')
+            ->public()
+            ->latest('published_at')
+            ->paginate(10);
+    }
+
+
+
 }
