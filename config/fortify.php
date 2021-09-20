@@ -1,8 +1,5 @@
 <?php
 
-use App\Providers\RouteServiceProvider;
-use Laravel\Fortify\Features;
-
 return [
 
     /*
@@ -16,7 +13,7 @@ return [
     |
     */
 
-    // 'guard' => 'web',
+    'guard' => 'web',
 
     /*
     |--------------------------------------------------------------------------
@@ -29,7 +26,7 @@ return [
     |
     */
 
-    // 'passwords' => 'users',
+    'passwords' => 'users',
 
     /*
     |--------------------------------------------------------------------------
@@ -46,9 +43,9 @@ return [
     |
     */
 
-    // 'username' => 'email',
+    'username' => 'name',
 
-    // 'email' => 'email',
+    'email' => 'email',
 
     /*
     |--------------------------------------------------------------------------
@@ -61,22 +58,7 @@ return [
     |
     */
 
-    // 'home' => RouteServiceProvider::HOME,
-
-    /*
-    |--------------------------------------------------------------------------
-    | Fortify Routes Prefix / Subdomain
-    |--------------------------------------------------------------------------
-    |
-    | Here you may specify which prefix Fortify will assign to all the routes
-    | that it registers with the application. If necessary, you may change
-    | subdomain under which all of the Fortify routes will be available.
-    |
-    */
-
-    // 'prefix' => '',
-
-    // 'domain' => null,
+    'home' => '/admin',
 
     /*
     |--------------------------------------------------------------------------
@@ -89,7 +71,7 @@ return [
     |
     */
 
-    // 'middleware' => ['web'],
+    'middleware' => ['web'],
 
     /*
     |--------------------------------------------------------------------------
@@ -102,10 +84,9 @@ return [
     |
     */
 
-    // 'limiters' => [
-    //     'login' => 'login',
-    //     'two-factor' => 'two-factor',
-    // ],
+    'limiters' => [
+        'login' => 5,
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -118,7 +99,7 @@ return [
     |
     */
 
-    // 'views' => true,
+    'views' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -130,22 +111,9 @@ return [
     | these features or you can even remove all of these if you need to.
     |
     */
-    'username' => 'name',
-    'email' => 'email',
-    'home' => '/admin',
-    'limiters' => [
-        'login' => 5,
-    ],
-    'features' => [
-        // Features::registration(),
-        // Features::resetPasswords(),
-        // // Features::emailVerification(),
-        // Features::updateProfileInformation(),
-        // Features::updatePasswords(),
-        // Features::twoFactorAuthentication([
-        //     'confirmPassword' => true,
-        // ]),
-    ],
+
+    'features' => [],
+
     // adminでアクセス
     'path' => 'admin',
 ];

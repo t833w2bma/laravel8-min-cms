@@ -1,5 +1,6 @@
 <?php
 /**
+ var_dump($tags);exit;
  * @var Illuminate\Pagination\LengthAwarePaginator|\App\Models\Post[] $posts
  */
 $title = '投稿一覧';
@@ -22,16 +23,16 @@ $title = '投稿一覧';
                 ]) }}
             </div>
             <div class="col-auto">
-                {{-- Form::select('user_id', $users, null, [
+                {{ Form::select('user_id', $users, null, [
                     'class' => 'custom-select',
                     'placeholder' => '選択してください。'
-                ]) --}}
+                ]) }}
             </div>
             <div class="col-auto">
-                {{-- Form::select('is_public', config('common.public_status'), null, [
+                {{ Form::select('is_public', config('common.public_status'), null, [
                     'class' => 'custom-select',
                     'placeholder' => '選択してください。'
-                ]) --}}
+                ]) }}
             </div>
             <div class="col-auto">
                 {{ Form::select('tag_id', $tags, null, [
@@ -64,7 +65,7 @@ $title = '投稿一覧';
                 <tr>
                     <td>{{ $post->id }}</td>
                     <td>{{ $post->title }}</td>
-                    <td>{{-- $post->is_public_label --}}</td>
+                    <td>{{ $post->is_public_label }}</td>
                     <td>
                         @foreach($post->tags as $tag)
                             @if (!$loop->first)、@endif

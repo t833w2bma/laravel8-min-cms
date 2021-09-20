@@ -1,5 +1,6 @@
 <?php
 /**
+ var_dump($users); exit;
  * @var Illuminate\Pagination\LengthAwarePaginator|\App\Models\User[] $users
  */
 $title = 'ユーザー一覧';
@@ -23,11 +24,12 @@ $title = 'ユーザー一覧';
             </thead>
             <tbody>
             @foreach($users as $user)
+         
                 <tr>
                     <td>{{ $user->id }}</td>
                     <td>{{ $user->name }}</td>
                     <td>{{ $user->email }}</td>
-                    <td>{{ $user->role_label }}</td>
+                    <td>{{ $user->role }}</td>
                     <td class="d-flex justify-content-center">
                         {{ link_to_route('back.users.edit', '編集', $user, [
                             'class' => 'btn btn-secondary btn-sm m-1'
