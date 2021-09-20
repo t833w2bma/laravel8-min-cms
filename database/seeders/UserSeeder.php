@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
                 'name' => 'admin',
                 'email' => 'admin@example.com',
                 'email_verified_at' => now(),
-                'password' => \Hash::make('123456789'),
+                'password' => \Hash::make('wert3333'),
                 'role' => 1,
                 'created_at' => now(),
                 'updated_at' => now()

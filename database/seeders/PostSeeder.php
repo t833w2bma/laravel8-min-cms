@@ -14,7 +14,10 @@ class PostSeeder extends Seeder
      */
     public function run()
     {
-        //50件登録するには次のようにします。
-        Post::factory()->count(50)->create();
+        // イベントを実行しないように修正
+        \Event::fakeFor(function () {
+            //50件登録するには次のようにします。
+            Post::factory()->count(50)->create();
+        });
     }
 }

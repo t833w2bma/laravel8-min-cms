@@ -74,4 +74,17 @@ class Post extends Model
         return $this->published_at->format('Y年m月d日');
     }
 
+    /*もし id 以外のカラム名を関連付ける場合はbelongsToの第二引数に指定します。*/
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
+
+    protected static function boot(){ // update で勝手に呼び出されるらしい
+        parent::boot();
+    
+        // 保存時user_idをログインユーザーに設定
+        self::saving(function($post) {
+            $post->user_id = \Auth::id();
+        });
+    }
 }

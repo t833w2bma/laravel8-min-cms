@@ -13,7 +13,11 @@ class PostController extends Controller
     
     public function index(){
         // 一覧画面
-        $posts = Post::latest('id')->paginate(20);
+        /*
+            $posts = Post::latest('id')->paginate(20);
+            一覧ページのクエリを確認するとレコードの数だけクエリが発行されているのでEager Loadingを使う
+        */
+        $posts = Post::with('user')->latest('id')->paginate(20);
         return view('back.posts.index', compact('posts'));
 
     }
